@@ -17,8 +17,7 @@ const EXPONENT: u32 = 0x10001;
 /// # Returns
 /// Hex-encoded encrypted bytes
 pub fn encrypt_rsa(message: &str) -> String {
-    let n = BigUint::parse_bytes(MODULUS_HEX.as_bytes(), 16)
-        .expect("Failed to parse RSA modulus");
+    let n = BigUint::parse_bytes(MODULUS_HEX.as_bytes(), 16).expect("Failed to parse RSA modulus");
     let e = BigUint::from(EXPONENT);
 
     let public_key = RsaPublicKey::new(n, e).expect("Failed to construct RSA public key");

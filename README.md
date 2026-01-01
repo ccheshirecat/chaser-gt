@@ -11,15 +11,17 @@ A high-performance Rust port of [GeekedTest](https://github.com/xKiian/GeekedTes
 - **Async/Await**: Built on Tokio for efficient concurrent captcha solving
 - **Cross-Platform**: Works on Windows, macOS, and Linux
 
-## Quick Start
+## Installation
 
 Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-chaser-gt = { path = "chaser-gt" }
+chaser-gt = { git = "https://github.com/ccheshirecat/chaser-gt" }
 tokio = { version = "1", features = ["full"] }
 ```
+
+## Quick Start
 
 Basic usage:
 
@@ -170,6 +172,46 @@ Key dependencies:
 - `image`, `imageproc` - Image processing for slide captcha
 - `ort` - ONNX Runtime for icon captcha (optional)
 
+## API Reference
+
+### GeekedResult
+
+The `solve()` method returns a `GeekedResult` containing all the fields needed for verification:
+
+```rust
+pub struct GeekedResult {
+    pub captcha_id: String,      // The captcha ID used
+    pub lot_number: String,      // Unique lot number for this solve
+    pub pass_token: String,      // Token to submit to the site
+    pub gen_time: String,        // Generation timestamp
+    pub captcha_output: String,  // Encrypted captcha output
+}
+```
+
+### Error Handling
+
+```rust
+use chaser_gt::{Geeked, RiskType, GeekedError};
+
+match solver.solve().await {
+    Ok(result) => println!("Token: {}", result.pass_token),
+    Err(GeekedError::NetworkError(e)) => eprintln!("Network failed: {}", e),
+    Err(GeekedError::CaptchaFailed(msg)) => eprintln!("Captcha failed: {}", msg),
+    Err(GeekedError::DeobfuscationFailed) => eprintln!("Script deobfuscation failed"),
+    Err(e) => eprintln!("Other error: {}", e),
+}
+```
+
+## Requirements
+
+- Rust 1.70+ (for async traits)
+- Internet connection (fetches Geetest scripts for deobfuscation)
+- Optional: Proxy for production use
+
 ## License
 
 MIT License - same as the original GeekedTest project.
+
+## Acknowledgements
+
+- [GeekedTest](https://github.com/xKiian/GeekedTest) - Original Python implementation by xKiian

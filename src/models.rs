@@ -112,56 +112,58 @@ pub struct VerifyResponse {
 }
 
 /// Helper to deserialize fields that can be either string or integer
-fn deserialize_optional_string_or_int<'de, D>(deserializer: D) -> std::result::Result<Option<String>, D::Error>
+fn deserialize_optional_string_or_int<'de, D>(
+    deserializer: D,
+) -> std::result::Result<Option<String>, D::Error>
 where
     D: serde::Deserializer<'de>,
 {
     use serde::de::{self, Visitor};
-    
+
     struct StringOrIntVisitor;
-    
+
     impl<'de> Visitor<'de> for StringOrIntVisitor {
         type Value = Option<String>;
-        
+
         fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
             formatter.write_str("a string, integer, or null")
         }
-        
+
         fn visit_none<E>(self) -> std::result::Result<Self::Value, E>
         where
             E: de::Error,
         {
             Ok(None)
         }
-        
+
         fn visit_unit<E>(self) -> std::result::Result<Self::Value, E>
         where
             E: de::Error,
         {
             Ok(None)
         }
-        
+
         fn visit_str<E>(self, v: &str) -> std::result::Result<Self::Value, E>
         where
             E: de::Error,
         {
             Ok(Some(v.to_string()))
         }
-        
+
         fn visit_string<E>(self, v: String) -> std::result::Result<Self::Value, E>
         where
             E: de::Error,
         {
             Ok(Some(v))
         }
-        
+
         fn visit_i64<E>(self, v: i64) -> std::result::Result<Self::Value, E>
         where
             E: de::Error,
         {
             Ok(Some(v.to_string()))
         }
-        
+
         fn visit_u64<E>(self, v: u64) -> std::result::Result<Self::Value, E>
         where
             E: de::Error,
@@ -169,7 +171,7 @@ where
             Ok(Some(v.to_string()))
         }
     }
-    
+
     deserializer.deserialize_any(StringOrIntVisitor)
 }
 

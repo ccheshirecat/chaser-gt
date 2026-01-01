@@ -22,10 +22,12 @@ impl SlideSolver {
     /// * `puzzle_piece` - Bytes of the puzzle piece image
     /// * `background` - Bytes of the background image
     pub fn from_bytes(puzzle_piece: &[u8], background: &[u8]) -> Result<Self> {
-        let puzzle_piece = image::load_from_memory(puzzle_piece)
-            .map_err(|e| GeekedError::ImageProcessing(format!("Failed to load puzzle piece: {}", e)))?;
-        let background = image::load_from_memory(background)
-            .map_err(|e| GeekedError::ImageProcessing(format!("Failed to load background: {}", e)))?;
+        let puzzle_piece = image::load_from_memory(puzzle_piece).map_err(|e| {
+            GeekedError::ImageProcessing(format!("Failed to load puzzle piece: {}", e))
+        })?;
+        let background = image::load_from_memory(background).map_err(|e| {
+            GeekedError::ImageProcessing(format!("Failed to load background: {}", e))
+        })?;
 
         Ok(Self {
             puzzle_piece,
@@ -55,7 +57,11 @@ impl SlideSolver {
         let bg_edges = canny_edge_detection(&bg_gray, 100.0, 200.0);
 
         // Template matching
-        let result = match_template(&bg_edges, &piece_edges, MatchTemplateMethod::CrossCorrelationNormalized);
+        let result = match_template(
+            &bg_edges,
+            &piece_edges,
+            MatchTemplateMethod::CrossCorrelationNormalized,
+        );
         let extremes = find_extremes(&result);
 
         // Get the position of maximum correlation
@@ -99,16 +105,27 @@ fn canny_edge_detection(image: &GrayImage, low_threshold: f64, high_threshold: f
     }
 
     // Non-maximum suppression
-    let suppressed = non_maximum_suppression(&magnitude, &direction, width as usize, height as usize);
+    let suppressed =
+        non_maximum_suppression(&magnitude, &direction, width as usize, height as usize);
 
     // Double thresholding and hysteresis
-    let result = double_threshold_hysteresis(&suppressed, low_threshold, high_threshold, width as usize, height as usize);
+    let result = double_threshold_hysteresis(
+        &suppressed,
+        low_threshold,
+        high_threshold,
+        width as usize,
+        height as usize,
+    );
 
     // Convert to GrayImage
     let mut output = GrayImage::new(width, height);
     for x in 0..width {
         for y in 0..height {
-            let val = if result[x as usize][y as usize] { 255 } else { 0 };
+            let val = if result[x as usize][y as usize] {
+                255
+            } else {
+                0
+            };
             output.put_pixel(x, y, Luma([val]));
         }
     }
@@ -130,11 +147,11 @@ fn gaussian_blur(image: &GrayImage) -> GrayImage {
     for x in 1..width - 1 {
         for y in 1..height - 1 {
             let mut sum = 0.0;
-            for kx in 0..3 {
-                for ky in 0..3 {
+            for (kx, kernel_row) in kernel.iter().enumerate() {
+                for (ky, kernel_val) in kernel_row.iter().enumerate() {
                     let px = (x as i32 + kx as i32 - 1) as u32;
                     let py = (y as i32 + ky as i32 - 1) as u32;
-                    sum += image.get_pixel(px, py)[0] as f64 * kernel[kx][ky];
+                    sum += image.get_pixel(px, py)[0] as f64 * kernel_val;
                 }
             }
             output.put_pixel(x, y, Luma([sum.clamp(0.0, 255.0) as u8]));
@@ -190,19 +207,20 @@ fn non_maximum_suppression(
             let angle = direction[x][y].to_degrees();
             let angle = if angle < 0.0 { angle + 180.0 } else { angle };
 
-            let (neighbor1, neighbor2) = if (0.0..22.5).contains(&angle) || (157.5..180.0).contains(&angle) {
-                // Horizontal
-                (magnitude[x + 1][y], magnitude[x - 1][y])
-            } else if (22.5..67.5).contains(&angle) {
-                // Diagonal (/)
-                (magnitude[x + 1][y - 1], magnitude[x - 1][y + 1])
-            } else if (67.5..112.5).contains(&angle) {
-                // Vertical
-                (magnitude[x][y + 1], magnitude[x][y - 1])
-            } else {
-                // Diagonal (\)
-                (magnitude[x - 1][y - 1], magnitude[x + 1][y + 1])
-            };
+            let (neighbor1, neighbor2) =
+                if (0.0..22.5).contains(&angle) || (157.5..180.0).contains(&angle) {
+                    // Horizontal
+                    (magnitude[x + 1][y], magnitude[x - 1][y])
+                } else if (22.5..67.5).contains(&angle) {
+                    // Diagonal (/)
+                    (magnitude[x + 1][y - 1], magnitude[x - 1][y + 1])
+                } else if (67.5..112.5).contains(&angle) {
+                    // Vertical
+                    (magnitude[x][y + 1], magnitude[x][y - 1])
+                } else {
+                    // Diagonal (\)
+                    (magnitude[x - 1][y - 1], magnitude[x + 1][y + 1])
+                };
 
             if magnitude[x][y] >= neighbor1 && magnitude[x][y] >= neighbor2 {
                 suppressed[x][y] = magnitude[x][y];

@@ -25,12 +25,46 @@ const ICON_MAPPING: &[(&str, &str)] = &[
 /// Charset from the ONNX model - maps class indices to labels.
 /// Labels are in format "{object}_{direction}" e.g., "car_r", "butterfly_lu"
 const CHARSET: &[&str] = &[
-    "car_r", "butterfly_ru", "car_ru", "car_l", "plane_ru", "butterfly_d", "plane_ld",
-    "butterfly_lu", "fish_ru", "fish_r", "plane_d", "turtle_ru", "car_d", "car_u",
-    "butterfly_l", "fish_l", "turtle_u", "turtle_l", "fish_u", "turtle_r", "butterfly_r",
-    "fish_rd", "plane_r", "butterfly_ld", "fish_d", "fish_ld", "fish_lu", "plane_u",
-    "turtle_ld", "turtle_lu", "plane_l", "car_ld", "plane_lu", "car_lu", "plane_rd",
-    "butterfly_u", "turtle_rd", "butterfly_rd", "car_rd", "turtle_d",
+    "car_r",
+    "butterfly_ru",
+    "car_ru",
+    "car_l",
+    "plane_ru",
+    "butterfly_d",
+    "plane_ld",
+    "butterfly_lu",
+    "fish_ru",
+    "fish_r",
+    "plane_d",
+    "turtle_ru",
+    "car_d",
+    "car_u",
+    "butterfly_l",
+    "fish_l",
+    "turtle_u",
+    "turtle_l",
+    "fish_u",
+    "turtle_r",
+    "butterfly_r",
+    "fish_rd",
+    "plane_r",
+    "butterfly_ld",
+    "fish_d",
+    "fish_ld",
+    "fish_lu",
+    "plane_u",
+    "turtle_ld",
+    "turtle_lu",
+    "plane_l",
+    "car_ld",
+    "plane_lu",
+    "car_lu",
+    "plane_rd",
+    "butterfly_u",
+    "turtle_rd",
+    "butterfly_rd",
+    "car_rd",
+    "turtle_d",
 ];
 
 /// Model input dimensions (from charsets.json: "image": [-1, 64])
@@ -77,11 +111,20 @@ impl IconSolver {
     /// Create a new IconSolver, loading the ONNX model.
     pub fn new() -> Result<Self> {
         let session = Session::builder()
-            .map_err(|e| GeekedError::ImageProcessing(format!("Failed to create ONNX session builder: {}", e)))?
+            .map_err(|e| {
+                GeekedError::ImageProcessing(format!(
+                    "Failed to create ONNX session builder: {}",
+                    e
+                ))
+            })?
             .with_optimization_level(GraphOptimizationLevel::Level3)
-            .map_err(|e| GeekedError::ImageProcessing(format!("Failed to set optimization level: {}", e)))?
+            .map_err(|e| {
+                GeekedError::ImageProcessing(format!("Failed to set optimization level: {}", e))
+            })?
             .commit_from_memory(ICON_MODEL)
-            .map_err(|e| GeekedError::ImageProcessing(format!("Failed to load ONNX model: {}", e)))?;
+            .map_err(|e| {
+                GeekedError::ImageProcessing(format!("Failed to load ONNX model: {}", e))
+            })?;
 
         let icon_map = ICON_MAPPING
             .iter()
@@ -117,9 +160,9 @@ impl IconSolver {
 
         // Filter components by size (icons should be within a reasonable size range)
         let min_size = (width * height / 400) as usize; // At least 0.25% of image
-        let max_size = (width * height / 4) as usize;   // At most 25% of image
-        let min_dim = 20u32;  // Minimum dimension
-        let max_dim = width.min(height) / 2;  // Maximum dimension
+        let max_size = (width * height / 4) as usize; // At most 25% of image
+        let min_dim = 20u32; // Minimum dimension
+        let max_dim = width.min(height) / 2; // Maximum dimension
 
         components
             .into_iter()
@@ -137,7 +180,11 @@ impl IconSolver {
     }
 
     /// Classify the direction of an icon using the ONNX model.
-    fn classify_direction(&mut self, img: &DynamicImage, bbox: &BoundingBox) -> Result<Option<String>> {
+    fn classify_direction(
+        &mut self,
+        img: &DynamicImage,
+        bbox: &BoundingBox,
+    ) -> Result<Option<String>> {
         // Crop the region
         let cropped = img.crop_imm(bbox.x1, bbox.y1, bbox.width(), bbox.height());
 
@@ -169,8 +216,9 @@ impl IconSolver {
         }
 
         // Create input value from ndarray (must be owned, not a view)
-        let input_value = ort::value::Value::from_array(input)
-            .map_err(|e| GeekedError::ImageProcessing(format!("Failed to create input tensor: {}", e)))?;
+        let input_value = ort::value::Value::from_array(input).map_err(|e| {
+            GeekedError::ImageProcessing(format!("Failed to create input tensor: {}", e))
+        })?;
 
         // Run inference
         let outputs = self
