@@ -4,7 +4,8 @@ version = "0.1.0"
 edition = "2021"
 description = "High-performance Geetest v4 captcha solver with automatic deobfuscation"
 license = "MIT"
-repository = "https://github.com/xKiian/GeekedTest"
+authors = ["ccheshirecat"]
+repository = "https://github.com/ccheshirecat/chaser-gt"
 keywords = ["geetest", "captcha", "solver", "automation"]
 categories = ["web-programming", "cryptography"]
 
