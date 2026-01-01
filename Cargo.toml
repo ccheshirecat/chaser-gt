@@ -1,0 +1,79 @@
+[package]
+name = "chaser-gt"
+version = "0.1.0"
+edition = "2021"
+description = "High-performance Geetest v4 captcha solver with automatic deobfuscation"
+license = "MIT"
+repository = "https://github.com/xKiian/GeekedTest"
+keywords = ["geetest", "captcha", "solver", "automation"]
+categories = ["web-programming", "cryptography"]
+
+[lib]
+name = "chaser_gt"
+path = "src/lib.rs"
+
+[[example]]
+name = "solve_captcha"
+path = "examples/solve_captcha.rs"
+
+[[example]]
+name = "test_shuffle"
+path = "examples/test_shuffle.rs"
+
+[dependencies]
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# HTTP with TLS impersonation (Chrome fingerprint) + proxy support
+rquest = { version = "5", features = ["json", "cookies", "socks"] }
+
+# Cryptography (RustCrypto)
+aes = "0.8"
+cbc = { version = "0.1", features = ["alloc", "std"] }
+rsa = "0.9"
+num-bigint-dig = "0.8"
+sha1 = "0.10"
+sha2 = "0.10"
+md-5 = "0.10"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Image processing
+image = "0.25"
+imageproc = "0.25"
+
+# ONNX Runtime for icon solver (optional, behind feature flag)
+ort = { version = "2.0.0-rc.10", default-features = false, features = ["ndarray", "download-binaries"], optional = true }
+ndarray = { version = "0.16", optional = true }
+
+# Logging
+tracing = "0.1"
+
+# Utilities
+rand = "0.8"
+uuid = { version = "1", features = ["v4"] }
+hex = "0.4"
+regex = "1"
+thiserror = "2"
+anyhow = "1"
+urlencoding = "2"
+chrono = { version = "0.4", features = ["serde"] }
+
+# For caching deobfuscated constants
+directories = "5"
+
+[dev-dependencies]
+tokio-test = "0.4"
+tracing-subscriber = "0.3"
+
+[features]
+default = []
+# Enable icon solver (requires ONNX runtime)
+icon = ["dep:ort", "dep:ndarray"]
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3
