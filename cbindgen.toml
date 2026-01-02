@@ -1,0 +1,29 @@
+# cbindgen configuration for chaser-gt FFI
+
+language = "C"
+header = """
+/**
+ * chaser-gt C FFI bindings
+ *
+ * High-performance Geetest v4 captcha solver.
+ *
+ * Build with: cargo build --release --features ffi
+ * Link with: -lchaser_gt -lpthread -ldl -lm
+ */
+"""
+include_guard = "CHASER_GT_H"
+no_includes = true
+sys_includes = ["stdint.h", "stdbool.h"]
+
+[export]
+prefix = ""
+include = ["GeekedResult"]
+
+[fn]
+prefix = ""
+
+[struct]
+rename_fields = "None"
+
+[enum]
+rename_variants = "None"

@@ -76,6 +76,9 @@ pub mod models;
 pub mod sign;
 pub mod solvers;
 
+#[cfg(feature = "ffi")]
+pub mod ffi;
+
 // Re-exports for convenience
 pub use client::{Geeked, GeekedBuilder};
 pub use error::{GeekedError, Result};

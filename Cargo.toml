@@ -12,6 +12,7 @@ categories = ["web-programming", "cryptography"]
 [lib]
 name = "chaser_gt"
 path = "src/lib.rs"
+crate-type = ["lib", "cdylib", "staticlib"]
 
 [[example]]
 name = "solve_captcha"
@@ -73,6 +74,11 @@ tracing-subscriber = "0.3"
 default = []
 # Enable icon solver (requires ONNX runtime)
 icon = ["dep:ort", "dep:ndarray"]
+# Enable C FFI bindings
+ffi = []
+
+[build-dependencies]
+cbindgen = "0.26"
 
 [profile.release]
 lto = true

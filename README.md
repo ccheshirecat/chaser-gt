@@ -85,7 +85,7 @@ To enable icon captcha support, add the `icon` feature:
 
 ```toml
 [dependencies]
-chaser-gt = { path = "chaser-gt", features = ["icon"] }
+chaser-gt = { git = "https://github.com/ccheshirecat/chaser-gt", features = ["icon"] }
 ```
 
 The icon solver uses:
@@ -145,6 +145,130 @@ cargo build --release
 
 # With icon support (includes ONNX runtime)
 cargo build --release --features icon
+
+# With C FFI bindings
+cargo build --release --features ffi
+```
+
+## C FFI Bindings
+
+chaser-gt provides C FFI bindings for use from Python, Go, Node.js, C/C++, etc.
+
+### Building FFI Library
+
+```bash
+cargo build --release --features ffi
+
+# Library outputs:
+# - target/release/libchaser_gt.so (Linux)
+# - target/release/libchaser_gt.dylib (macOS)
+# - target/release/chaser_gt.dll (Windows)
+
+# C header generated at:
+# - include/chaser_gt.h
+```
+
+### C Example
+
+```c
+#include "chaser_gt.h"
+#include <stdio.h>
+
+int main() {
+    // Solve a slide captcha (blocking call)
+    GeekedResult result = geeked_solve(
+        "your_captcha_id",  // captcha_id
+        "slide",            // risk_type: slide, gobang, icon, ai
+        NULL,               // proxy (optional): "http://user:pass@host:port"
+        NULL                // user_info (optional)
+    );
+
+    if (result.error_code == 0) {
+        printf("lot_number: %s\n", result.lot_number);
+        printf("pass_token: %s\n", result.pass_token);
+        printf("captcha_output: %s\n", result.captcha_output);
+    } else {
+        printf("Error: %s\n", result.error_message);
+    }
+
+    geeked_free_result(result);
+    return 0;
+}
+```
+
+Compile with:
+```bash
+gcc -o example example.c -L./target/release -lchaser_gt -lpthread -ldl -lm
+```
+
+### Python Example (ctypes)
+
+```python
+import ctypes
+import json
+from ctypes import c_char_p, c_int, Structure, POINTER
+
+# Load library
+lib = ctypes.CDLL('./target/release/libchaser_gt.so')  # or .dylib on macOS
+
+# Define result structure
+class GeekedResult(Structure):
+    _fields_ = [
+        ('error_code', c_int),
+        ('error_message', c_char_p),
+        ('captcha_id', c_char_p),
+        ('lot_number', c_char_p),
+        ('pass_token', c_char_p),
+        ('gen_time', c_char_p),
+        ('captcha_output', c_char_p),
+    ]
+
+# Or use the simpler JSON API
+lib.geeked_solve_json.restype = c_char_p
+
+result_json = lib.geeked_solve_json(
+    b"your_captcha_id",
+    b"slide",
+    None,  # proxy
+    None   # user_info
+)
+
+result = json.loads(result_json.decode())
+lib.geeked_free_string(result_json)
+
+if result['success']:
+    print(f"pass_token: {result['pass_token']}")
+else:
+    print(f"Error: {result['error']}")
+```
+
+### FFI Functions
+
+```c
+// Solve captcha, returns struct with all fields
+GeekedResult geeked_solve(
+    const char* captcha_id,   // Required
+    const char* risk_type,    // Required: "slide", "gobang", "icon", "ai"
+    const char* proxy,        // Optional: "http://host:port" or "socks5://host:port"
+    const char* user_info     // Optional: site-specific binding
+);
+
+// Solve captcha, returns JSON string
+char* geeked_solve_json(
+    const char* captcha_id,
+    const char* risk_type,
+    const char* proxy,
+    const char* user_info
+);
+
+// Free result struct
+void geeked_free_result(GeekedResult result);
+
+// Free string
+void geeked_free_string(char* s);
+
+// Get library version
+const char* geeked_version();
 ```
 
 ## Running Tests
