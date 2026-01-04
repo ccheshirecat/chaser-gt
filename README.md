@@ -70,6 +70,26 @@ let solver = Geeked::builder("captcha_id", RiskType::Ai)
     .await?;
 ```
 
+## With IPv6/Local Address Binding
+
+For scenarios where you need to route captcha solving through a specific network interface or IPv6 address (e.g., BGP exit nodes):
+
+```rust
+use std::net::IpAddr;
+
+let ipv6: IpAddr = "2a11:29c0:4f50::1".parse().unwrap();
+
+let solver = Geeked::builder("captcha_id", RiskType::Ai)
+    .local_address(ipv6)  // Bind to specific IPv6
+    .build()
+    .await?;
+```
+
+This is useful for:
+- **BGP exit nodes**: Route each account through a unique /128 from your subnet
+- **Multi-IP setups**: Distribute captcha solving across multiple IPs
+- **IP consistency**: Ensure captcha and subsequent requests use the same IP
+
 ## Supported Captcha Types
 
 | Type | Enum | Description |

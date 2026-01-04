@@ -6,6 +6,7 @@ use crate::models::{Constants, GeetestResponse, LoadResponse, RiskType, SecCode,
 use crate::sign::{generate_w_parameter, SolverResult};
 use crate::solvers::{GobangSolver, SlideSolver};
 use rquest::{Client, Proxy};
+use std::net::IpAddr;
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -15,6 +16,7 @@ pub struct GeekedBuilder {
     risk_type: RiskType,
     proxy: Option<String>,
     user_info: Option<String>,
+    local_address: Option<IpAddr>,
 }
 
 impl GeekedBuilder {
@@ -25,6 +27,7 @@ impl GeekedBuilder {
             risk_type,
             proxy: None,
             user_info: None,
+            local_address: None,
         }
     }
 
@@ -37,6 +40,23 @@ impl GeekedBuilder {
     /// ```
     pub fn proxy(mut self, proxy: impl Into<String>) -> Self {
         self.proxy = Some(proxy.into());
+        self
+    }
+
+    /// Set local address to bind outgoing connections to.
+    ///
+    /// This is useful for routing traffic through a specific network interface
+    /// or IPv6 address from a BGP subnet.
+    ///
+    /// # Examples
+    /// ```ignore
+    /// use std::net::IpAddr;
+    /// 
+    /// .local_address("2a11:29c0:4f50::1".parse().unwrap())
+    /// .local_address(IpAddr::V6("::1".parse().unwrap()))
+    /// ```
+    pub fn local_address(mut self, addr: IpAddr) -> Self {
+        self.local_address = Some(addr);
         self
     }
 
@@ -59,6 +79,11 @@ impl GeekedBuilder {
     pub async fn build(self) -> Result<Geeked> {
         // rquest v5 has TLS fingerprinting built-in by default
         let mut builder = Client::builder();
+
+        // Set local address for IPv6 binding
+        if let Some(addr) = self.local_address {
+            builder = builder.local_address(addr);
+        }
 
         if let Some(proxy_url) = &self.proxy {
             builder = builder.proxy(Proxy::all(proxy_url)?);
