@@ -167,13 +167,23 @@ impl Geeked {
         let wrapper: GeetestResponse<T> = serde_json::from_str(json_str)?;
 
         if wrapper.status != "success" {
+            // Include the error code and message from Geetest
+            let error_detail = match (&wrapper.code, &wrapper.msg) {
+                (Some(code), Some(msg)) => format!("status={}, code={}, msg={}", wrapper.status, code, msg),
+                (Some(code), None) => format!("status={}, code={}", wrapper.status, code),
+                (None, Some(msg)) => format!("status={}, msg={}", wrapper.status, msg),
+                (None, None) => format!("status={}", wrapper.status),
+            };
+            tracing::error!("Geetest API error: {}", error_detail);
             return Err(GeekedError::InvalidResponse(format!(
-                "Geetest returned status: {}",
-                wrapper.status
+                "Geetest returned error: {}",
+                error_detail
             )));
         }
 
-        Ok(wrapper.data)
+        wrapper.data.ok_or_else(|| {
+            GeekedError::InvalidResponse("Geetest returned success but no data".into())
+        })
     }
 
     /// Load captcha data from Geetest server.

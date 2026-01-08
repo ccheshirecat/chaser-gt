@@ -48,7 +48,14 @@ pub struct SecCode {
 #[derive(Debug, Deserialize)]
 pub struct GeetestResponse<T> {
     pub status: String,
-    pub data: T,
+    #[serde(default)]
+    pub data: Option<T>,
+    /// Error code (present when status != "success")
+    #[serde(default)]
+    pub code: Option<String>,
+    /// Error message (present when status != "success")  
+    #[serde(default)]
+    pub msg: Option<String>,
 }
 
 /// Response from /load endpoint.
