@@ -48,7 +48,7 @@ pub struct SecCode {
 #[derive(Debug, Deserialize)]
 pub struct GeetestResponse<T> {
     pub status: String,
-    #[serde(default)]
+    /// Data field - only present on success
     pub data: Option<T>,
     /// Error code (present when status != "success")
     #[serde(default)]
