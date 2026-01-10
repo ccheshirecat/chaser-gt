@@ -6,7 +6,6 @@ use crate::models::{Constants, GeetestResponse, LoadResponse, RiskType, SecCode,
 use crate::sign::{generate_w_parameter, SolverResult};
 use crate::solvers::{GobangSolver, SlideSolver};
 use rquest::{Client, Proxy};
-use rquest_util::Emulation;
 use std::net::IpAddr;
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -78,9 +77,9 @@ impl GeekedBuilder {
 
     /// Build the Geeked client.
     pub async fn build(self) -> Result<Geeked> {
-        // Use Chrome131 emulation for proper TLS fingerprint
-        let mut builder = Client::builder()
-            .emulation(Emulation::Chrome131);
+        // Use simple client without browser emulation
+        // Geetest may be detecting Chrome TLS fingerprint from datacenter IPs
+        let mut builder = Client::builder();
 
         // Set local address for IPv6 binding
         if let Some(addr) = self.local_address {
