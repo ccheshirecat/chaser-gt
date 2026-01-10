@@ -121,7 +121,7 @@ impl Deobfuscator {
         ];
 
         let resp = client
-            .get("https://gcaptcha4.geevisit.com/load")
+            .get("https://gcaptcha4.geetest.com/load")
             .query(&params)
             .send()
             .await?;
@@ -162,7 +162,7 @@ impl Deobfuscator {
         // rquest v5 has TLS fingerprinting built-in by default
         let client = rquest::Client::new();
 
-        let script_url = format!("https://static.geevisit.com{}/js/gcaptcha4.js", static_path);
+        let script_url = format!("https://static.geetest.com{}/js/gcaptcha4.js", static_path);
         let script = client.get(&script_url).send().await?.text().await?;
 
         // Extract XOR key and encrypted table

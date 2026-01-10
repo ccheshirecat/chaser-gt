@@ -5,7 +5,7 @@ use crate::error::{GeekedError, Result};
 use crate::models::{Constants, GeetestResponse, LoadResponse, RiskType, SecCode, VerifyResponse};
 use crate::sign::{generate_w_parameter, SolverResult};
 use crate::solvers::{GobangSolver, SlideSolver};
-use rquest::{Client, Proxy};
+use rquest::{Client, Impersonate, Proxy};
 use std::net::IpAddr;
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -77,8 +77,9 @@ impl GeekedBuilder {
 
     /// Build the Geeked client.
     pub async fn build(self) -> Result<Geeked> {
-        // rquest v5 has TLS fingerprinting built-in by default
-        let mut builder = Client::builder();
+        // Use Chrome131 impersonation for proper TLS fingerprint
+        let mut builder = Client::builder()
+            .impersonate(Impersonate::Chrome131);
 
         // Set local address for IPv6 binding
         if let Some(addr) = self.local_address {
@@ -206,7 +207,7 @@ impl Geeked {
 
         let response = self
             .client
-            .get("https://gcaptcha4.geevisit.com/load")
+            .get("https://gcaptcha4.geetest.com/load")
             .query(&params)
             .send()
             .await?
@@ -337,7 +338,7 @@ impl Geeked {
 
         let response = self
             .client
-            .get("https://gcaptcha4.geevisit.com/verify")
+            .get("https://gcaptcha4.geetest.com/verify")
             .query(&params)
             .send()
             .await?
