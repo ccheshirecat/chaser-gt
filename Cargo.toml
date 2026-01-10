@@ -28,7 +28,7 @@ tokio = { version = "1", features = ["full"] }
 
 # HTTP with TLS impersonation (Chrome fingerprint) + proxy support
 rquest = { version = "5", features = ["json", "cookies", "socks"] }
-rquest-util = "5"
+rquest-util = "2.2"
 
 # Cryptography (RustCrypto)
 aes = "0.8"
