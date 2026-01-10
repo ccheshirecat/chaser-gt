@@ -5,7 +5,8 @@ use crate::error::{GeekedError, Result};
 use crate::models::{Constants, GeetestResponse, LoadResponse, RiskType, SecCode, VerifyResponse};
 use crate::sign::{generate_w_parameter, SolverResult};
 use crate::solvers::{GobangSolver, SlideSolver};
-use rquest::{Client, Impersonate, Proxy};
+use rquest::{Client, Proxy};
+use rquest_util::Emulation;
 use std::net::IpAddr;
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -77,9 +78,9 @@ impl GeekedBuilder {
 
     /// Build the Geeked client.
     pub async fn build(self) -> Result<Geeked> {
-        // Use Chrome131 impersonation for proper TLS fingerprint
+        // Use Chrome131 emulation for proper TLS fingerprint
         let mut builder = Client::builder()
-            .impersonate(Impersonate::Chrome131);
+            .emulation(Emulation::Chrome131);
 
         // Set local address for IPv6 binding
         if let Some(addr) = self.local_address {
