@@ -25,7 +25,7 @@ path = "examples/test_shuffle.rs"
 [dependencies]
 # Async runtime
 tokio = { version = "1", features = ["full"] }
-
+zstd = { version = "0.13", default-features = false, features = ["pkg-config"] }
 # HTTP with TLS impersonation (Chrome fingerprint) + proxy support
 rquest = { version = "5", features = ["json", "cookies", "socks"] }
 rquest-util = "2.2"

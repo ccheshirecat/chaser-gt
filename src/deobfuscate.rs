@@ -173,6 +173,18 @@ impl Deobfuscator {
 
         // Replace obfuscated names in script
         let deobfuscated = self.replace_obfuscated_names(&script, &table)?;
+        
+        // Debug: Log a sample of the deobfuscated script to help diagnose extraction
+        if let Some(lib_pos) = deobfuscated.find("_lib") {
+            let start = lib_pos.saturating_sub(20);
+            let end = (lib_pos + 100).min(deobfuscated.len());
+            tracing::debug!("Deobfuscated _lib context: {}", &deobfuscated[start..end]);
+        }
+        if let Some(abo_pos) = deobfuscated.find("_abo") {
+            let start = abo_pos.saturating_sub(20);
+            let end = (abo_pos + 150).min(deobfuscated.len());
+            tracing::debug!("Deobfuscated _abo context: {}", &deobfuscated[start..end]);
+        }
 
         // Extract constants
         let abo = self.extract_abo(&deobfuscated)?;
@@ -240,7 +252,8 @@ impl Deobfuscator {
             if let (Some(full), Some(index_str)) = (cap.get(0), cap.get(2)) {
                 if let Ok(index) = index_str.as_str().parse::<usize>() {
                     if let Some(replacement) = table.get(index) {
-                        result = result.replace(full.as_str(), &format!("'{}'", replacement));
+                        // Use double quotes like Go's fmt.Sprintf("%q", ...) 
+                        result = result.replace(full.as_str(), &format!("\"{}\"", replacement));
                     }
                 }
             }
@@ -251,8 +264,8 @@ impl Deobfuscator {
 
     /// Extract the abo constant from deobfuscated script.
     fn extract_abo(&self, script: &str) -> Result<HashMap<String, String>> {
-        // Match: ['_lib']={...},
-        let re = Regex::new(r"\['_lib']=(\{[^}]+\}),")?;
+        // Match: ["_lib"]={...}, (double quotes from deobfuscation)
+        let re = Regex::new(r#"\["_lib"\]=(\{[^}]+\}),"#)?;
         let abo_str = re
             .captures(script)
             .and_then(|c| c.get(1))
@@ -275,8 +288,8 @@ impl Deobfuscator {
 
     /// Extract the mapping constant from deobfuscated script.
     fn extract_mapping(&self, script: &str) -> Result<String> {
-        // Match: ['_abo']=...}\()
-        let re = Regex::new(r"\['_abo']=(.+?)\}\(\)")?;
+        // Match: ["_abo"]={"pattern":"result"} (Go's format)
+        let re = Regex::new(r#"\["_abo"\]=(\{"[^}]+\})"#)?;
         let mapping = re
             .captures(script)
             .and_then(|c| c.get(1))
@@ -290,8 +303,8 @@ impl Deobfuscator {
 
     /// Extract the device_id from deobfuscated script.
     fn extract_device_id(&self, script: &str) -> String {
-        // Match: ['options']['deviceId']='...'
-        let re = Regex::new(r"\['options']\['deviceId']='([^']*)'").ok();
+        // Match: ["options"]["deviceId"]="..." (double quotes)
+        let re = Regex::new(r#"\["options"\]\["deviceId"\]="([^"]*)""#).ok();
         re.and_then(|r| r.captures(script))
             .and_then(|c| c.get(1))
             .map(|m| m.as_str().to_string())
