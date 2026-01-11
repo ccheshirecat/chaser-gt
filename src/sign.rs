@@ -167,7 +167,7 @@ pub fn generate_w_parameter(
         "lang": "zh",
         "ep": "123",
         "biht": "1426265548",
-        "device_id": &constants.device_id,
+        "device_id": "",  // Go version uses empty string
         "lot_number": lot_number,
         "pow_msg": pow_result.pow_msg,
         "pow_sign": pow_result.pow_sign,
