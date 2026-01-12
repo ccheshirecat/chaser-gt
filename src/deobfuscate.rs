@@ -175,15 +175,21 @@ impl Deobfuscator {
         let deobfuscated = self.replace_obfuscated_names(&script, &table)?;
         
         // Debug: Log a sample of the deobfuscated script to help diagnose extraction
+        // Use char-safe operations to avoid panics on unicode
         if let Some(lib_pos) = deobfuscated.find("_lib") {
-            let start = lib_pos.saturating_sub(20);
-            let end = (lib_pos + 100).min(deobfuscated.len());
-            tracing::debug!("Deobfuscated _lib context: {}", &deobfuscated[start..end]);
+            // Take chars around the match position
+            let context: String = deobfuscated.chars()
+                .skip(lib_pos.saturating_sub(20))
+                .take(120)
+                .collect();
+            tracing::debug!("Deobfuscated _lib context: {}", context);
         }
         if let Some(abo_pos) = deobfuscated.find("_abo") {
-            let start = abo_pos.saturating_sub(20);
-            let end = (abo_pos + 150).min(deobfuscated.len());
-            tracing::debug!("Deobfuscated _abo context: {}", &deobfuscated[start..end]);
+            let context: String = deobfuscated.chars()
+                .skip(abo_pos.saturating_sub(20))
+                .take(170)
+                .collect();
+            tracing::debug!("Deobfuscated _abo context: {}", context);
         }
 
         // Extract constants
