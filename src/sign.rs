@@ -19,8 +19,9 @@ impl LotParser {
     /// `{"(n[13:15]+n[3:5])+.+(n[1:3]+n[26:28])+.+(n[20:27])":"n[13:18]"}`
     pub fn new(mapping: &str) -> Result<Self> {
         // Parse the mapping string to extract key and value patterns
-        // Format: {"pattern_key":"pattern_value"} or {pattern_key:pattern_value}
-        let re = Regex::new(r#"["\']?([^"':]+)["\']?\s*:\s*["\']?([^"'}\]]+)["\']?"#)?;
+        // Format: {"pattern_key":"pattern_value"}
+        // Use same regex as Go: "([^\"]+)":"([^\"]+)"
+        let re = Regex::new(r#""([^"]+)":"([^"]+)""#)?;
 
         let caps = re.captures(mapping).ok_or_else(|| {
             GeekedError::Encryption(format!("Invalid mapping format: {}", mapping))
@@ -28,6 +29,8 @@ impl LotParser {
 
         let key_pattern = caps.get(1).map(|m| m.as_str()).unwrap_or("");
         let value_pattern = caps.get(2).map(|m| m.as_str()).unwrap_or("");
+        
+        tracing::debug!(key_pattern, value_pattern, "LotParser extracted patterns");
 
         let lot = Self::parse_pattern(key_pattern)?;
         let lot_res = Self::parse_pattern(value_pattern)?;
