@@ -19,11 +19,14 @@ impl LotParser {
     /// `{"(n[13:15]+n[3:5])+.+(n[1:3]+n[26:28])+.+(n[20:27])":"n[13:18]"}`
     pub fn new(mapping: &str) -> Result<Self> {
         // Parse the mapping string to extract key and value patterns
-        // Format: {"pattern_key":"pattern_value"}
-        // Use same regex as Go: "([^\"]+)":"([^\"]+)"
+        // Format can be {"pattern":"result"} or {"pattern":'result'} (mixed quotes)
+        // Try double-double first, then double-single like Go
         let re = Regex::new(r#""([^"]+)":"([^"]+)""#)?;
-
-        let caps = re.captures(mapping).ok_or_else(|| {
+        
+        let caps = re.captures(mapping).or_else(|| {
+            // Fallback: double quote key, single quote value
+            Regex::new(r#""([^"]+)":'([^']+)'"#).ok()?.captures(mapping)
+        }).ok_or_else(|| {
             GeekedError::Encryption(format!("Invalid mapping format: {}", mapping))
         })?;
 
