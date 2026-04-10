@@ -97,6 +97,7 @@ fn parse_risk_type(s: &str) -> Option<RiskType> {
         "gobang" => Some(RiskType::Gobang),
         "icon" => Some(RiskType::Icon),
         "ai" | "invisible" => Some(RiskType::Ai),
+        "svg" => Some(RiskType::Svg),
         _ => None,
     }
 }
@@ -146,7 +147,7 @@ pub unsafe extern "C" fn geeked_solve(
             return GeekedResult::error(
                 3,
                 format!(
-                    "Invalid risk_type '{}'. Valid values: slide, gobang, icon, ai",
+                    "Invalid risk_type '{}'. Valid values: slide, gobang, icon, ai, svg",
                     risk_type_str
                 ),
             )

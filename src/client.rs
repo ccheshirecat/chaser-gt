@@ -309,6 +309,44 @@ impl Geeked {
                 // AI/invisible captcha doesn't need solving
                 Ok(SolverResult::Ai)
             }
+
+            RiskType::Svg => {
+                #[cfg(feature = "svg")]
+                {
+                    use crate::solvers::SvgSolver;
+
+                    let svg_path = data.svg.as_ref().ok_or_else(|| {
+                        GeekedError::InvalidResponse("Missing svg path for svg captcha".into())
+                    })?;
+                    let prompt_path = data.prompt.as_ref().ok_or_else(|| {
+                        GeekedError::InvalidResponse("Missing prompt path for svg captcha".into())
+                    })?;
+
+                    let (svg_bytes, prompt_bytes) = tokio::try_join!(
+                        self.download_image(svg_path),
+                        self.download_image(prompt_path)
+                    )?;
+
+                    let svg_text = String::from_utf8(svg_bytes).map_err(|e| {
+                        GeekedError::ImageProcessing(format!("SVG is not valid UTF-8: {e}"))
+                    })?;
+
+                    let solver = SvgSolver::new(svg_text, prompt_bytes);
+                    let result = solver.solve()?;
+
+                    Ok(SolverResult::Svg {
+                        userresponse: result.userresponse,
+                        passtime: result.passtime,
+                    })
+                }
+
+                #[cfg(not(feature = "svg"))]
+                {
+                    Err(GeekedError::UnsupportedType(
+                        "SVG captcha requires 'svg' feature to be enabled".into(),
+                    ))
+                }
+            }
         }
     }
 

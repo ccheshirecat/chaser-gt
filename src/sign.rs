@@ -244,6 +244,12 @@ pub fn generate_w_parameter(
             SolverResult::Ai => {
                 // AI/invisible captcha doesn't need additional fields
             }
+            SolverResult::Svg { userresponse, passtime } => {
+                if let Value::Object(ref mut map) = payload {
+                    map.insert("passtime".to_string(), json!(passtime));
+                    map.insert("userresponse".to_string(), json!(userresponse));
+                }
+            }
         }
     }
 
@@ -263,6 +269,8 @@ pub enum SolverResult {
     Icon { positions: Vec<Vec<f64>> },
     /// AI/invisible captcha (no user interaction).
     Ai,
+    /// SVG icon captcha result with grid position and timing.
+    Svg { userresponse: [i32; 2], passtime: u32 },
 }
 
 #[cfg(test)]

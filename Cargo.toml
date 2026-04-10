@@ -51,6 +51,11 @@ imageproc = "0.25"
 ort = { version = "2.0.0-rc.10", default-features = false, features = ["ndarray", "download-binaries"], optional = true }
 ndarray = { version = "0.16", optional = true }
 
+# SVG rendering for SVG icon solver (optional, behind feature flag)
+resvg = { version = "0.44", optional = true }
+usvg = { version = "0.44", optional = true }
+tiny-skia = { version = "0.11", optional = true }
+
 # Logging
 tracing = "0.1"
 
@@ -75,6 +80,8 @@ tracing-subscriber = "0.3"
 default = []
 # Enable icon solver (requires ONNX runtime)
 icon = ["dep:ort", "dep:ndarray"]
+# Enable SVG icon solver (pure Rust, no external dependencies)
+svg = ["dep:resvg", "dep:usvg", "dep:tiny-skia"]
 # Enable C FFI bindings
 ffi = []
 

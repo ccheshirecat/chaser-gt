@@ -53,6 +53,7 @@
 //! - `RiskType::Gobang` - Five-in-a-row puzzle
 //! - `RiskType::Icon` - Icon selection captcha (requires `icon` feature)
 //! - `RiskType::Ai` - AI/Invisible captcha
+//! - `RiskType::Svg` - SVG animated icon captcha (requires `svg` feature)
 //!
 //! ## Automatic Constant Updates
 //!
@@ -103,5 +104,6 @@ mod tests {
         assert_eq!(RiskType::Gobang.as_str(), "gobang");
         assert_eq!(RiskType::Icon.as_str(), "icon");
         assert_eq!(RiskType::Ai.as_str(), "ai");
+        assert_eq!(RiskType::Svg.as_str(), "svg");
     }
 }

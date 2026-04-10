@@ -14,6 +14,8 @@ pub enum RiskType {
     Icon,
     /// AI/Invisible captcha
     Ai,
+    /// SVG animated icon captcha
+    Svg,
 }
 
 impl RiskType {
@@ -24,6 +26,7 @@ impl RiskType {
             RiskType::Gobang => "gobang",
             RiskType::Icon => "icon",
             RiskType::Ai => "ai",
+            RiskType::Svg => "svg",
         }
     }
 }
@@ -77,6 +80,11 @@ pub struct LoadResponse {
     // Icon-specific
     #[serde(default)]
     pub imgs: Option<String>,
+    // SVG-specific
+    #[serde(default)]
+    pub svg: Option<String>,
+    #[serde(default)]
+    pub prompt: Option<String>,
 }
 
 /// Proof of Work details from server.
