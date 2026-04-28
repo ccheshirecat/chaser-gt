@@ -1,6 +1,10 @@
+<a href="https://chaser.sh"><img src="banner.png" alt="Chaser — The Infrastructure Platform" width="100%"/></a>
+
 # chaser-gt
 
 A high-performance Rust port of [GeekedTest](https://github.com/xKiian/GeekedTest) - a Geetest v4 captcha solver.
+
+Part of the [Chaser](https://chaser.sh) automation toolkit — battle-tested captcha solvers built alongside the browser stealth stack powering chaser.sh.
 
 ## Features
 
@@ -359,3 +363,9 @@ MIT License - same as the original GeekedTest project.
 ## Acknowledgements
 
 - [GeekedTest](https://github.com/xKiian/GeekedTest) - Original Python implementation by xKiian
+
+---
+
+<p align="center">
+  <sub>Part of the <a href="https://chaser.sh"><strong>Chaser</strong></a> open-source ecosystem &nbsp;·&nbsp; <a href="https://chaser.sh/sprinter">Run it on your own infrastructure →</a></sub>
+</p>
